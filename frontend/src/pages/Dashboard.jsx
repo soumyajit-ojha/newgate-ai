@@ -36,25 +36,40 @@ const Dashboard = () => {
     };
 
     const handleGenerate = async () => {
-        if (!prompt || !targetImage) {
-            alert("Please provide a prompt and a target image!");
+        // 1. Validation
+        if (!prompt) {
+            alert("Please enter a prompt!");
+            return;
+        }
+        if (!selfImage) {
+            alert("Please upload your Self Image!");
+            return;
+        }
+        if (!targetImage) {
+            alert("Please upload a Target Style Image!");
             return;
         }
 
         setLoading(true);
+
+        // 2. Prepare Data
         const formData = new FormData();
         formData.append('prompt', prompt);
-        // Currently Backend expects 'image'. We send target_image for now.
-        formData.append('image', targetImage);
+        formData.append('self_image', selfImage);     // Must match backend param name
+        formData.append('target_image', targetImage); // Must match backend param name
 
         try {
+            // 3. Send to Backend
             const res = await api.post('/generate', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+
+            // 4. Show Result
             setOutputImage(res.data.output_url);
+
         } catch (error) {
             console.error("Generation failed", error);
-            alert("Something went wrong!");
+            alert("Something went wrong! Check console.");
         } finally {
             setLoading(false);
         }

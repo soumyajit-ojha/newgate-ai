@@ -19,33 +19,36 @@ router = APIRouter()
 @router.post("/generate")
 async def generate_image(
     prompt: str = Form(...),
-    image: UploadFile = File(...),
+    self_image: UploadFile = File(...),   # <--- New Input
+    target_image: UploadFile = File(...), # <--- New Input
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # 1. Initialize Services
     storage_service = StorageService()
     ai_service = AIService()
 
     try:
-        # 2. Upload Input Image to Storage
-        input_url = await storage_service.upload_file(image)
+        # 1. Upload BOTH images to Supabase Storage
+        self_image_url = await storage_service.upload_file(self_image)
+        target_image_url = await storage_service.upload_file(target_image)
 
-        # 3. Create Database Record (Status: Processing)
+        # 2. Save Metadata to DB
         db_record = ImageGeneration(
-        user_id=current_user.id,
-        prompt=prompt,
-        input_image_url=input_url,
-        status="processing"
-    )
+            user_id=current_user.id,
+            prompt=prompt,
+            self_image_url=self_image_url,     # Save URL 1
+            target_image_url=target_image_url, # Save URL 2
+            status="processing"
+        )
         db.add(db_record)
         db.commit()
         db.refresh(db_record)
 
-        # 4. Call AI Service (In a real app, this might be a background task/queue)
-        output_url = await ai_service.generate_image(prompt, input_url)
+        # 3. Call AI (Mocked for now)
+        # We pass both URLs to the AI service
+        output_url = await ai_service.generate_image(prompt, self_image_url) 
 
-        # 5. Update Record with Result
+        # 4. Update DB with Result
         db_record.output_image_url = output_url
         db_record.status = "completed"
         db.commit()
@@ -53,13 +56,14 @@ async def generate_image(
         return {
             "id": db_record.id,
             "status": "completed",
-            "input_url": input_url,
-            "output_url": output_url,
-            "prompt": prompt,
+            "self_image_url": self_image_url,
+            "target_image_url": target_image_url,
+            "output_url": output_url
         }
 
     except Exception as e:
-        return HTTPException(status_code=500, detail=str(e))
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Input Schema
