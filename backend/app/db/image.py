@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Text
 from sqlalchemy.sql import func
 from app.db.base import Base
 
+
 class ImageGeneration(Base):
     __tablename__ = "image_generations"
 
