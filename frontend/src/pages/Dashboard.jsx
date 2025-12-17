@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import api from '../api';
 
 const Dashboard = () => {
@@ -12,17 +12,26 @@ const Dashboard = () => {
     // State for UI
     const [loading, setLoading] = useState(false);
     const [outputImage, setOutputImage] = useState(null);
+    const [history, setHistory] = useState([]); // Start empty, fetch real data
 
     // File Input Refs (hidden inputs)
     const selfInputRef = useRef(null);
     const targetInputRef = useRef(null);
 
-    // Mock History Data (We will connect API later)
-    const [history] = useState([
-        "https://picsum.photos/seed/101/200/200",
-        "https://picsum.photos/seed/102/200/200",
-        "https://picsum.photos/seed/103/200/200",
-    ]);
+    // --- 1. Fetch History on Load ---
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const fetchHistory = async () => {
+        try {
+            // This calls the GET endpoint we just created in backend
+            const res = await api.get('/image/history');
+            setHistory(res.data);
+        } catch (error) {
+            console.error("Failed to load history", error);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.clear();
@@ -36,7 +45,7 @@ const Dashboard = () => {
     };
 
     const handleGenerate = async () => {
-        // 1. Validation
+        // Validation
         if (!prompt) {
             alert("Please enter a prompt!");
             return;
@@ -52,20 +61,23 @@ const Dashboard = () => {
 
         setLoading(true);
 
-        // 2. Prepare Data
+        // Prepare Data
         const formData = new FormData();
         formData.append('prompt', prompt);
-        formData.append('self_image', selfImage);     // Must match backend param name
-        formData.append('target_image', targetImage); // Must match backend param name
+        formData.append('self_image', selfImage);
+        formData.append('target_image', targetImage);
 
         try {
-            // 3. Send to Backend
-            const res = await api.post('/generate', formData, {
+            // Send to Backend
+            const res = await api.post('/image/create', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            // 4. Show Result
+            // Show Result
             setOutputImage(res.data.output_url);
+
+            // --- 2. Refresh History immediately ---
+            fetchHistory();
 
         } catch (error) {
             console.error("Generation failed", error);
@@ -206,13 +218,30 @@ const Dashboard = () => {
             {/* --- Bottom: History --- */}
             <div style={{ marginTop: '3rem' }}>
                 <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Recent Creations</h3>
-                <div className="history-scroll">
-                    {history.map((imgUrl, index) => (
-                        <div key={index} className="history-item">
-                            <img src={imgUrl} alt={`History ${index}`} />
-                        </div>
-                    ))}
-                </div>
+
+                {history.length === 0 ? (
+                    <p style={{ color: '#64748b' }}>No images generated yet.</p>
+                ) : (
+                    <div className="history-scroll">
+                        {history.map((item) => (
+                            <div
+                                key={item.id}
+                                className="history-item"
+                                onClick={() => setOutputImage(item.generated_image_url || item.output_image_url)} // Handle different naming conventions
+                                title={item.prompt}
+                            >
+                                {/* Only show if url exists */}
+                                {(item.generated_image_url || item.output_image_url) ? (
+                                    <img src={item.generated_image_url || item.output_image_url} alt="Generated" />
+                                ) : (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#334155' }}>
+                                        <span>Processing</span>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
