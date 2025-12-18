@@ -1,6 +1,6 @@
 import asyncio
 import random
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 
@@ -17,27 +17,34 @@ router = APIRouter()
 
 @router.post("/create")
 async def create_generation(
-    prompt: str = Form(...),
+    prompt: Optional[str] = Form(None),
     self_image: UploadFile = File(...),
-    target_image: UploadFile = File(...),
+    target_image: Optional[UploadFile] = File(None),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # print("IMAGE CREATE METHOD CALLED.✔✅✅✅")
     storage = StorageService()
+    if not prompt and not target_image:
+        raise HTTPException(
+            status_code=400,
+            detail="You must provide either a Text Prompt OR a Target Style Image.",
+        )
 
-    # 1. Validation (Fail Fast)
     if not prompt or len(prompt) < 3:
         raise HTTPException(status_code=400, detail="Prompt too short")
 
     try:
         # 2. Upload Images to Supabase (Parallel Execution possible, but sequential is safer for now)
-        self_url = await storage.upload(self_image, folder="inputs")
-        target_url = await storage.upload(target_image, folder="targets")
+        self_url = await storage.upload_file(self_image, folder="inputs")
+        target_url = None
+        if target_image:
+            target_url = await storage.upload_file(target_image, folder="targets")
 
         # 3. Create Database Record (Status: PENDING)
         db_gen = ImageGeneration(
             user_id=current_user.id,
-            prompt=prompt,
+            prompt=prompt or "",
             self_image_url=self_url,
             target_image_url=target_url,
             status=GenerationStatus.PROCESSING,

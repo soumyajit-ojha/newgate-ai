@@ -20,7 +20,7 @@ export default defineConfig({
     headers: {
       // ⚠️ THIS FIXES THE GOOGLE POPUP ERROR
       "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-      "Cross-Origin-Embedder-Policy": "require-corp",
+      // "Cross-Origin-Embedder-Policy": "require-corp",
     },
     // Optional: This sets up a "Proxy" to fix Network Errors permanently
     proxy: {

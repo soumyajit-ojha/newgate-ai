@@ -5,15 +5,13 @@ from datetime import datetime
 
 # Shared properties
 class GenerationBase(BaseModel):
-    prompt: str = Field(
-        ..., min_length=3, description="Prompt must be at least 3 chars"
-    )
+    prompt: Optional[str] = Field(None, description="Prompt text")
 
 
 # Properties to receive on creation (Internal use mostly, since API uses Form Data)
 class GenerationCreate(GenerationBase):
     self_image_url: str
-    target_image_url: str
+    target_image_url: Optional[str] = None
 
 
 # Properties to return to the Frontend
@@ -21,7 +19,7 @@ class GenerationResponse(GenerationBase):
     id: int
     user_id: int
     self_image_url: str
-    target_image_url: str
+    target_image_url: Optional[str] = None 
     generated_image_url: Optional[str] = None
     status: str
     created_at: datetime
