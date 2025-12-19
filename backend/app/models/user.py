@@ -1,20 +1,17 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from app.db.base import Base
+from app.db.base_class import Base
 
 
 class User(Base):
-    __tablename__ = "users"
+    # __tablename__ is auto-generated as "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    google_id = Column(
-        String, unique=True, index=True, nullable=False
-    )  # The unique 'sub' from Google
-    full_name = Column(String, nullable=True)
-    profile_picture = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    email = Column(String(300), unique=True, index=True, nullable=False)
+    google_id = Column(String(300), unique=True, index=True, nullable=False)
+    full_name = Column(String(300), nullable=True)
+    profile_picture = Column(String(300), nullable=True)
 
-    # Relationship to images
-    images = relationship("ImageGeneration", back_populates="owner")
+    # Modularity: Relationship to the generations table
+    generations = relationship(
+        "ImageGeneration", back_populates="owner", cascade="all, delete-orphan"
+    )

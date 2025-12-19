@@ -1,11 +1,13 @@
 fastapi==0.124.4
 uvicorn==0.38.0
 PyJWT==2.10.1
-supabase==2.25.1
 SQLAlchemy==2.0.45
-psycopg2-binary==2.9.11
 python-multipart==0.0.20
 alembic==1.17.2
 google-auth==2.45.0  
 requests==2.32.5
-PyJWT==2.10.
+python-decouple==3.8
+PyMySQL==1.1.2
+cryptography==46.0.3 
+boto3==1.42.13
+# psycopg2-binary==2.9.11

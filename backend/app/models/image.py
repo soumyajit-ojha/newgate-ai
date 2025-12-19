@@ -1,20 +1,31 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from app.db.base import Base
+import enum
+from app.db.base_class import Base
+
+
+# Enforce status types
+class GenerationStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
 
 class ImageGeneration(Base):
-    __tablename__ = "image_generations"
+    # __tablename__ is auto-generated as "generations"
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+
     prompt = Column(Text, nullable=False)
-    
-    self_image_url = Column(String, nullable=False)
-    target_image_url = Column(String, nullable=False)
-    
-    output_image_url = Column(String, nullable=True)
-    status = Column(String, default="processing")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    owner = relationship("User", back_populates="images")
+    self_image_url = Column(String(500), nullable=False)
+    target_image_url = Column(String(500))
+
+    generated_image_url = Column(String(500), nullable=True)
+
+    # Status Tracking
+    status = Column(String(100), default=GenerationStatus.PENDING, nullable=False)
+
+    # Relationship back to User
+    owner = relationship("User", back_populates="generations")

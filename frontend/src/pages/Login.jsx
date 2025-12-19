@@ -9,7 +9,7 @@ const Login = () => {
   const handleSuccess = async (credentialResponse) => {
     try {
       console.log("Google Token:", credentialResponse.credential);
-      const res = await api.post('/auth/google', {
+      const res = await api.post('/google', {
         credential: credentialResponse.credential
       });
       localStorage.setItem('access_token', res.data.access_token);
@@ -23,25 +23,24 @@ const Login = () => {
 
   return (
     <div className="flex-center">
-      <div className="glass-card">
-        {/* Decorative Icon */}
+      {/* Changed class to glass-card-login to avoid overlapping dashboard styles */}
+      <div className="glass-card glass-card-login">
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
-        
+
         <h1>Newgate AI</h1>
         <p className="subtitle">
-          Turn your imagination into reality.<br/>
+          Turn your imagination into reality.<br />
           Sign in to start creating.
         </p>
-        
-        {/* We wrap the button to make it look clean on dark mode */}
+
         <div className="google-btn-wrapper">
-            <GoogleLogin
-                onSuccess={handleSuccess}
-                onError={() => console.log('Login Failed')}
-                theme="outline" 
-                size="large"
-                shape="rectangular"
-            />
+          <GoogleLogin
+            onSuccess={handleSuccess}
+            onError={() => console.log('Login Failed')}
+            theme="outline"
+            size="large"
+            shape="rectangular"
+          />
         </div>
       </div>
     </div>

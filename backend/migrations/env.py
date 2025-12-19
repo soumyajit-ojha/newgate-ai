@@ -10,23 +10,17 @@ from alembic import context
 from decouple import config
 from urllib import parse
 
+RDS_ENDPOINT = config("RDS_ENDPOINT")
+RDS_USER = config("RDS_USER")
+RDS_PASSWORD = parse.quote_plus(config("RDS_PASSWORD"))
+DATABASE_URL = f"mysql+pymysql://{RDS_USER}:{RDS_PASSWORD}@{RDS_ENDPOINT}:3306/newgate"
 
-SUPABASE_URL_STR = str(config("SUPABASE_URL")).split("/")[-1]
-SUPABASE_DB_PASSWORD = parse.quote_plus(config("SUPABASE_DB_PASSWORD"))
-DATABASE_URL = (
-    f"postgresql://postgres:{SUPABASE_DB_PASSWORD}@db.{SUPABASE_URL_STR}:5432/postgres"
-)
-# ---------------------------------------------------
-# 1. Add your project directory to python path
-# ---------------------------------------------------
+
 sys.path.append(os.getcwd())
 
-# ---------------------------------------------------
-# 2. Import your Config and Base
-# ---------------------------------------------------
-from app.db.base import Base
 
-# Import your models so Alembic can see them!
+from app.db.base_class import Base
+
 from app.models.user import User
 from app.models.image import ImageGeneration
 
@@ -37,16 +31,12 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# ---------------------------------------------------
-# 3. Set the MetaData object (for autogenerate support)
-# ---------------------------------------------------
 target_metadata = Base.metadata
 
-# ---------------------------------------------------
-# 4. Overwrite the SQLAlchemy URL from our Settings
-# ---------------------------------------------------
+
 def get_url():
     return DATABASE_URL
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -61,13 +51,14 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    
+
     # Inject the URL from settings
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = get_url()
-    
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -75,12 +66,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

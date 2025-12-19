@@ -24,13 +24,21 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 1rem;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
+  /* Slightly wider for dashboard */
   margin: 0 auto;
   padding: 2rem;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
 }
 
 /* --- Glassmorphism Card --- */
@@ -39,13 +47,20 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: var(--glass-border);
-  padding: 3rem;
+  padding: 2rem;
   border-radius: 24px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  text-align: center;
-  max-width: 420px;
   width: 100%;
   animation: fadeIn 0.5s ease-out;
+  box-sizing: border-box;
+  /* Crucial for preventing overlap */
+}
+
+/* Specific modifier for Login Page to keep it narrow */
+.glass-card-login {
+  max-width: 420px;
+  text-align: center;
+  margin: 0 auto;
 }
 
 /* --- Typography --- */
@@ -82,8 +97,8 @@ p.subtitle {
 
 .btn-logout {
   background: #ef4444;
-  /* Red for logout */
-  margin-top: 2rem;
+  margin-top: 0;
+  /* Reset margin */
 }
 
 .btn-primary:hover,
@@ -99,7 +114,6 @@ p.subtitle {
   margin-top: 1rem;
   padding: 4px;
   background: white;
-  /* White background makes Google logo pop */
   border-radius: 4px;
   width: fit-content;
   margin: 0 auto;
@@ -118,42 +132,49 @@ p.subtitle {
   }
 }
 
+/* --- DASHBOARD SPECIFIC --- */
 
-/* DASHBOARD CSS */
-
-/* Add to src/index.css */
-
-/* --- Dashboard Grid --- */
+/* Grid System: Controls (350px) | Output (Remaining space) */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  /* Split screen */
-  gap: 2rem;
+  grid-template-columns: 350px 1fr;
+  gap: 2.5rem;
+  /* Large gap to prevent overlapping */
   margin-top: 2rem;
+  align-items: start;
+  /* Ensures height doesn't stretch weirdly */
 }
 
-@media (max-width: 768px) {
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
-    /* Stack on mobile */
+    /* Stack vertically */
+  }
+
+  .output-stage {
+    height: 400px;
+    /* Smaller height on mobile */
   }
 }
 
-/* --- Upload Box Styling --- */
+/* Upload Boxes */
 .upload-box {
   border: 2px dashed rgba(99, 102, 241, 0.3);
   background: rgba(15, 23, 42, 0.5);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  height: 150px;
+  height: 130px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: var(--text-muted);
+  position: relative;
+  overflow: hidden;
 }
 
 .upload-box:hover {
@@ -167,7 +188,14 @@ p.subtitle {
   background: rgba(34, 197, 94, 0.1);
 }
 
-/* --- Input Field --- */
+.upload-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Input Field */
 .prompt-input {
   width: 100%;
   background: rgba(15, 23, 42, 0.6);
@@ -179,6 +207,7 @@ p.subtitle {
   margin-bottom: 1.5rem;
   resize: none;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .prompt-input:focus {
@@ -186,11 +215,12 @@ p.subtitle {
   border-color: #6366f1;
 }
 
-/* --- Output Stage --- */
+/* Output Stage */
 .output-stage {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 24px;
-  min-height: 400px;
+  height: 600px;
+  /* Fixed height for consistency */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -200,38 +230,59 @@ p.subtitle {
 }
 
 .generated-image {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  border-radius: 24px;
+  padding: 1rem;
 }
 
-/* --- History Section --- */
+/* History Section */
 .history-scroll {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
   padding: 1rem 0;
   margin-top: 1rem;
+  padding-bottom: 1.5rem;
+  /* Space for scrollbar */
 }
 
 .history-item {
-  min-width: 120px;
-  height: 120px;
+  min-width: 140px;
+  height: 140px;
   border-radius: 12px;
   background: var(--card-bg);
   border: var(--glass-border);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s;
+  position: relative;
+  /* For caption positioning */
 }
 
 .history-item:hover {
   transform: scale(1.05);
+  border-color: #a855f7;
 }
 
 .history-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* The Prompt Text Overlay */
+.history-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 6px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
