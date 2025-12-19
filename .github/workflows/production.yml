@@ -16,7 +16,7 @@ jobs:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
+          script: |
             # Stop script on first error
             set -e
 
