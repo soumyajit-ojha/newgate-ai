@@ -46,7 +46,7 @@
 
 #         # 3. Call AI (Mocked for now)
 #         # We pass both URLs to the AI service
-#         output_url = await ai_service.generate_image(prompt, self_image_url) 
+#         output_url = await ai_service.generate_image(prompt, self_image_url)
 
 #         # 4. Update DB with Result
 #         db_record.output_image_url = output_url
@@ -83,3 +83,4 @@
 #         raise HTTPException(status_code=400, detail="Invalid Google Token")
 
 #     return result
+# we will work here soon
