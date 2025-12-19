@@ -13,12 +13,14 @@ from app.api import auth, generate
 
 app = FastAPI(title="Newgate AI")
 
+protocol = config("HOST_PROTOCOL", default="http")
+ip = config("HOST_IP")
+port = config("HOST_PORT", default="8000")
+
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://localhost",
+    f"{protocol}://{ip}",  # e.g., http://54.12.34.56
+    f"{protocol}://{ip}:{port}",  # e.g., http://54.12.34.56:8000
+    "http://localhost:8000",  # Keep for safety/internal testing
 ]
 
 # CORS Configuration (Essential for React Frontend)
