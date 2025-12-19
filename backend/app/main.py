@@ -20,7 +20,6 @@ port = config("HOST_PORT", default="8000")
 origins = [
     f"{protocol}://{ip}",  # e.g., http://54.12.34.56
     f"{protocol}://{ip}:{port}",  # e.g., http://54.12.34.56:8000
-    "http://localhost:8000",  # Keep for safety/internal testing
 ]
 
 # CORS Configuration (Essential for React Frontend)

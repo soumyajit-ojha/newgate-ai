@@ -10,14 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@vv0.1.10
         with:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Stop script on first error
             set -e
 
             # 1. Navigate to Project Folder
@@ -28,42 +30,18 @@ jobs:
             git reset --hard origin/main
 
             # 3. Dynamic .env Creation
-            # We overwrite backend/.env with fresh secrets from GitHub
-            echo "RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }}" > backend/.env
-            echo "RDS_USER=${{ secrets.RDS_USER }}" > backend/.env
-            echo "RDS_PASSWORD=${{ secrets.RDS_PASSWORD }}" > backend/.env
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> backend/.env
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> backend/.env
-            echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> backend/.env
-            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> backend/.env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> backend/.env
-            echo "ALGORITHM=HS256" >> backend/.env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> backend/.env
-
-            # --- NEW: Dynamic CORS Variables ---
-            # We set these so your main.py config logic works
-            echo "HOST_PROTOCOL=http" >> backend/.env
             echo "HOST_IP=${{ secrets.HOST_IP }}" >> backend/.env
-            echo "HOST_PORT=8000" >> backend/.env
 
             # 4. Stop & Remove Old Container
             docker stop newgate || true
             docker rm newgate || true
 
-            docker build \
-              --build-arg VITE_GOOGLE_CLIENT_ID="${{ secrets.VITE_GOOGLE_CLIENT_ID }}" \
-              --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
-              -t newgate-app .
+            docker build --build-arg VITE_GOOGLE_CLIENT_ID="${{ secrets.VITE_GOOGLE_CLIENT_ID }}" --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} -t newgate:latest .
 
             # 6. Run Container
             # We map Port 80 (External) to 8000 (Internal)
             # We pass the backend/.env file we just created
-            docker run -d \
-              -p 8000:8000 \
-              --env-file backend/.env \
-              --restart unless-stopped \
-              --name newgate \
-              newgate-app
+            docker run -d -p 8000:8000 --env-file backend/.env --restart unless-stopped --name newgate newgate:latest 
 
             # 7. Cleanup Space
             docker image prune -f
