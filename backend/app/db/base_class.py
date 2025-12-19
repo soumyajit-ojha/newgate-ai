@@ -12,19 +12,8 @@ class Base:
     """
 
     id = Column(Integer, primary_key=True, index=True)
-
-    # Auto-set when created
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-
-    # Auto-update when modified
-    updated_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False,
-    )
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Helper to generate table name automatically from class name (User -> users)
     @declared_attr

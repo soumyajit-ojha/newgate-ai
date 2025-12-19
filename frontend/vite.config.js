@@ -23,12 +23,12 @@ export default defineConfig({
       // "Cross-Origin-Embedder-Policy": "require-corp",
     },
     // Optional: This sets up a "Proxy" to fix Network Errors permanently
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
-        secure: false,
-      }
-    }
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://127.0.0.1:8000',
+    //     changeOrigin: true,
+    //     secure: false,
+    //   }
+    // }
   },
 })

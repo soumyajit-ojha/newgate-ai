@@ -4,14 +4,12 @@ from decouple import config
 from urllib import parse
 
 # from app.core.config import settings
+RDS_ENDPOINT = config("RDS_ENDPOINT")
+RDS_USER = config("RDS_USER")
+RDS_PASSWORD = parse.quote_plus(config("RDS_PASSWORD"))
+DATABASE_URL = f"mysql+pymysql://{RDS_USER}:{RDS_PASSWORD}@{RDS_ENDPOINT}:3306/newgate"
 
-# Kleppmann: Connection pooling is handled by SQLAlchemy/Psycopg2 here
-SUPABASE_URL_STR = str(config("SUPABASE_URL")).split("/")[-1]
-SUPABASE_DB_PASSWORD = parse.quote_plus(config("SUPABASE_DB_PASSWORD"))
-DATABASE_URL = (
-    f"postgresql://postgres:{SUPABASE_DB_PASSWORD}@db.{SUPABASE_URL_STR}:5432/postgres"
-)
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
