@@ -36,7 +36,7 @@ jobs:
             docker stop newgate || true
             docker rm newgate || true
 
-            docker build --build-arg VITE_GOOGLE_CLIENT_ID="${{ secrets.VITE_GOOGLE_CLIENT_ID }}" --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} -t newgate:latest .
+            docker build -t newgate:latest .
 
             # 6. Run Container
             # We map Port 80 (External) to 8000 (Internal)
