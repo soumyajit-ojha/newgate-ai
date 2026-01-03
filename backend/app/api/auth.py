@@ -69,6 +69,7 @@ def login_google(request: GoogleLoginRequest, db: Session = Depends(get_db)):
         print("ERROR", str(v))
         raise HTTPException(status_code=400, detail="Invalid Google Token")
 
+    # handle exception
     except Exception as e:
         print("ERROR", str(e))
         raise HTTPException(status_code=400, detail="Something went wrong !!!")
